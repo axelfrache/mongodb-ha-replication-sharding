@@ -1,6 +1,6 @@
-# MongoDB TP - Replication and Sharding
+# MongoDB - Replication and Sharding
 
-MongoDB academic TP: replication (ReplicaSet) and sharding via Docker.
+MongoDB academic work: replication (ReplicaSet) and sharding via Docker.
 
 MovieLens data: `data/movielens/`
 
