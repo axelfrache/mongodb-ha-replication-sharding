@@ -1,0 +1,112 @@
+services:
+  mongo-primary:
+    image: mongo:7.0
+    container_name: mongo-primary
+    hostname: mongo-primary
+    command: [ "mongod", "--replSet", "RS1", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-primary-data:/data/db
+      - ./scripts/replication:/scripts
+      - ./data/movielens:/data/import
+    networks:
+      - mongo-replication-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-secondary1:
+    image: mongo:7.0
+    container_name: mongo-secondary1
+    hostname: mongo-secondary1
+    command: [ "mongod", "--replSet", "RS1", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-secondary1-data:/data/db
+    networks:
+      - mongo-replication-net
+    depends_on:
+      - mongo-primary
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-secondary2:
+    image: mongo:7.0
+    container_name: mongo-secondary2
+    hostname: mongo-secondary2
+    command: [ "mongod", "--replSet", "RS1", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "27019:27017"
+    volumes:
+      - mongo-secondary2-data:/data/db
+    networks:
+      - mongo-replication-net
+    depends_on:
+      - mongo-primary
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-secondary3:
+    image: mongo:7.0
+    container_name: mongo-secondary3
+    hostname: mongo-secondary3
+    command: [ "mongod", "--replSet", "RS1", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "27020:27017"
+    volumes:
+      - mongo-secondary3-data:/data/db
+    networks:
+      - mongo-replication-net
+    depends_on:
+      - mongo-primary
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo-arbiter:
+    image: mongo:7.0
+    container_name: mongo-arbiter
+    hostname: mongo-arbiter
+    command: [ "mongod", "--replSet", "RS1", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "30000:27017"
+    volumes:
+      - mongo-arbiter-data:/data/db
+    networks:
+      - mongo-replication-net
+    depends_on:
+      - mongo-primary
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo-primary-data:
+    name: mongo-rs1-primary
+  mongo-secondary1-data:
+    name: mongo-rs1-secondary1
+  mongo-secondary2-data:
+    name: mongo-rs1-secondary2
+  mongo-secondary3-data:
+    name: mongo-rs1-secondary3
+  mongo-arbiter-data:
+    name: mongo-rs1-arbiter
+
+networks:
+  mongo-replication-net:
+    name: mongo-replication-net
+    driver: bridge

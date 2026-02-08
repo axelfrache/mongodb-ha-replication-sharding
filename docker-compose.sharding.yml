@@ -1,0 +1,261 @@
+services:
+  cfg1:
+    image: mongo:7.0
+    container_name: cfg1
+    hostname: cfg1
+    command: [ "mongod", "--configsvr", "--replSet", "RSCFG", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "28017:27017"
+    volumes:
+      - cfg1-data:/data/db
+      - ./scripts/sharding:/scripts
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cfg2:
+    image: mongo:7.0
+    container_name: cfg2
+    hostname: cfg2
+    command: [ "mongod", "--configsvr", "--replSet", "RSCFG", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "28018:27017"
+    volumes:
+      - cfg2-data:/data/db
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cfg3:
+    image: mongo:7.0
+    container_name: cfg3
+    hostname: cfg3
+    command: [ "mongod", "--configsvr", "--replSet", "RSCFG", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "28019:27017"
+    volumes:
+      - cfg3-data:/data/db
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongos:
+    image: mongo:7.0
+    container_name: mongos
+    hostname: mongos
+    command: [ "mongos", "--configdb", "RSCFG/cfg1:27017,cfg2:27017,cfg3:27017", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "31000:27017"
+    volumes:
+      - ./scripts/sharding:/scripts
+      - ./data/movielens:/data/import
+    networks:
+      - mongo-sharding-net
+    depends_on:
+      - cfg1
+      - cfg2
+      - cfg3
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard1-1:
+    image: mongo:7.0
+    container_name: shard1-1
+    hostname: shard1-1
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD1", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29017:27017"
+    volumes:
+      - shard1-1-data:/data/db
+      - ./scripts/sharding:/scripts
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard1-2:
+    image: mongo:7.0
+    container_name: shard1-2
+    hostname: shard1-2
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD1", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29018:27017"
+    volumes:
+      - shard1-2-data:/data/db
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard1-3:
+    image: mongo:7.0
+    container_name: shard1-3
+    hostname: shard1-3
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD1", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29019:27017"
+    volumes:
+      - shard1-3-data:/data/db
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard2-1:
+    image: mongo:7.0
+    container_name: shard2-1
+    hostname: shard2-1
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD2", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29020:27017"
+    volumes:
+      - shard2-1-data:/data/db
+      - ./scripts/sharding:/scripts
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard2-2:
+    image: mongo:7.0
+    container_name: shard2-2
+    hostname: shard2-2
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD2", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29021:27017"
+    volumes:
+      - shard2-2-data:/data/db
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard2-3:
+    image: mongo:7.0
+    container_name: shard2-3
+    hostname: shard2-3
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD2", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29022:27017"
+    volumes:
+      - shard2-3-data:/data/db
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard3-1:
+    image: mongo:7.0
+    container_name: shard3-1
+    hostname: shard3-1
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD3", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29023:27017"
+    volumes:
+      - shard3-1-data:/data/db
+      - ./scripts/sharding:/scripts
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard3-2:
+    image: mongo:7.0
+    container_name: shard3-2
+    hostname: shard3-2
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD3", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29024:27017"
+    volumes:
+      - shard3-2-data:/data/db
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  shard3-3:
+    image: mongo:7.0
+    container_name: shard3-3
+    hostname: shard3-3
+    command: [ "mongod", "--shardsvr", "--replSet", "RSSHARD3", "--bind_ip_all", "--port", "27017" ]
+    ports:
+      - "29025:27017"
+    volumes:
+      - shard3-3-data:/data/db
+    networks:
+      - mongo-sharding-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  cfg1-data:
+    name: mongo-cfg1
+  cfg2-data:
+    name: mongo-cfg2
+  cfg3-data:
+    name: mongo-cfg3
+  shard1-1-data:
+    name: mongo-shard1-1
+  shard1-2-data:
+    name: mongo-shard1-2
+  shard1-3-data:
+    name: mongo-shard1-3
+  shard2-1-data:
+    name: mongo-shard2-1
+  shard2-2-data:
+    name: mongo-shard2-2
+  shard2-3-data:
+    name: mongo-shard2-3
+  shard3-1-data:
+    name: mongo-shard3-1
+  shard3-2-data:
+    name: mongo-shard3-2
+  shard3-3-data:
+    name: mongo-shard3-3
+
+networks:
+  mongo-sharding-net:
+    name: mongo-sharding-net
+    driver: bridge
